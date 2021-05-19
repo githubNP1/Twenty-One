@@ -5,11 +5,14 @@ public class Card {
     String suit;
     int value;
     Boolean faceUp;
+    Boolean ace = false;
+    Boolean ten = false;
 
-    public Card(String number, String suit, int value, Boolean faceUp){
+    public Card(String number, String suit, int value){
         this.number = number;
         this.suit = suit;
         this.value = value;
-        this.faceUp = faceUp;
+        if(value == 11){ace = true;}
+        else if(value == 10){ten = true;}
     }
 }
