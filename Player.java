@@ -1,10 +1,10 @@
 package Twenty_One;
 
-import java.util.*;
-
 public class Player {
     int chips;  //this is decided at beginning
-    ArrayList<Hand> hands = new ArrayList<>();
+    Hand hand = new Hand();
+    Hand secondHand = new Hand();
+    Boolean split = false;
     
     public Player(int chips){
         this.chips = chips;
