@@ -5,12 +5,20 @@ import java.util.*;
 public class Hand {
     ArrayList<Card> hand = new ArrayList<>();
     Boolean bust = false;
-    Boolean natural = false;
-    int score;
+    Boolean doubled = false;
+    Boolean splittable;
+    //Boolean natural = false;
+    //int score;
     int bet;
     
+    public Hand(){}
+    
+    public Hand(Boolean splittable){
+        this.splittable = splittable;
+    }
+    
     public int getTotalScore(){
-        score = 0;
+        int score = 0;
         for (Card card : hand){
             score += card.value;
         }
@@ -20,5 +28,23 @@ public class Hand {
     public void add(Card card, Boolean faceUp){
         hand.add(card);
         card.faceUp = faceUp;
+    }
+    
+    public Boolean checkNatural(){  //returns Boolean, maybe no need for Boolean natural
+        if(hand.size() == 2 && getTotalScore() == 21){
+            return true;
+        }
+        return false;
+    }
+    
+    public void clear(){
+        hand.clear();
+    }
+    
+    public String makeMove(){
+        String moves = "Do you want to 1) stand, 2) hit";
+        if(!doubled){moves += ", 3) double";}
+        if(splittable){moves += " or 4) split";}
+        return moves;
     }
 }
