@@ -3,7 +3,7 @@ package Twenty_One;
 public class Player {
     int chips;  //this is decided at beginning
     Hand hand = new Hand();
-    Hand secondHand = new Hand();
+    Hand secondHand = new Hand(false);
     Boolean split = false;
     
     public Player(int chips){
