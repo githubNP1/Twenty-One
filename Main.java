@@ -118,12 +118,98 @@ public class Main {
             System.out.println("Chips left: " + player.chips);
         }
         else{
-            play();
+            play(player, dealer, scan);
         }
     }
     
-    public void play(){
-        
+    public void play(Player player, Dealer dealer, Scanner scan){
+        //for every hand
+        for(Hand hand : player.hands){
+            hand.checkBust();
+            while(!hand.bust){
+                System.out.println(hand.makeMove());
+                String choice = scan.next();
+                while (!hand.moveChoices().contains(choice)){ 
+                    System.out.println("Enter a valid decision");
+                    choice = scan.next();
+                }
+                if(choice.equals("stand")){break;}
+                else if(choice.equals("hit")){ //make hit its own method
+                    hit(hand, true);
+                    player.seeCards();
+                }
+                else if(choice.equals("double")){
+                    player.chips -= hand.bet;
+                    hand.bet *= 2;
+                    hit(hand, false);
+                    player.seeCards();
+                    hand.doubled = true;
+                    break;
+                }
+                else if(choice.equals("split")){ 
+                    if(hand.hand.get(0).ace){
+                        player.split();
+                        hit(player.getFirstHand(), true);
+                        hit(player.getSecondHand(), true);
+                        player.seeCards();
+                        break;
+                    }
+                    else{
+                        player.split();
+                        hit(player.getFirstHand(), true);
+                        hit(player.getSecondHand(), true);
+                        player.seeCards();
+                    }
+                }
+            }
+        }
+        player.turnOverFaceDownCards();
+        for(Hand hand : player.hands){
+            if(hand.bust){
+                System.out.println("You are bust, dealer wins");
+            }
+            else{
+                dealersPlay(player, dealer, hand);
+            }
+        }
+    }
+    
+    public void hit(Hand hand, Boolean faceUp){
+        hand.add(deck.get(0), true); 
+        deck.remove(0);
+    }
+    
+    public void dealersPlay(Player player, Dealer dealer, Hand playerHand){
+        dealer.turnOverFaceDownCard();
+        while(!dealer.hand.bust){
+            if(dealer.hand.getTotalScore() >= 17){
+                break;
+            }
+            else{
+                hit(dealer.hand, true);
+                dealer.seeCards();
+            }
+            dealer.hand.checkBust();
+        }
+        if(dealer.hand.bust){
+            System.out.println("Dealer is bust, you win");
+            player.chips += 2 * playerHand.bet;
+            System.out.println("Chips left: " + player.chips);
+        }
+        //settlement
+        else if(dealer.hand.getTotalScore() > playerHand.getTotalScore()){
+            System.out.println("Dealer wins");
+        }
+        else if(dealer.hand.getTotalScore() < playerHand.getTotalScore()){
+            System.out.println("You win");
+            player.chips += 2 * playerHand.bet;
+            System.out.println("Chips left: " + player.chips);
+        }
+        else if(dealer.hand.getTotalScore() == playerHand.getTotalScore()){
+            System.out.println("Standoff");
+            player.chips += playerHand.bet;
+            System.out.println("Chips left: " + player.chips);
+        }
     }
     
     public void initialPlay(Scanner scan, Player player, Dealer dealer){
