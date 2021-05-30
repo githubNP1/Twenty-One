@@ -22,11 +22,19 @@ public class Player {
         return hand;
     }
     
+    public void split(){ 
+        Hand hand = new Hand(false);
+        hands.add(hand);
+        hand.add(getFirstHand().hand.get(1), true);
+        getFirstHand().hand.remove(1);
+        getFirstHand().splittable = false;
+    }
+    
     public void seeCards(){ //prints faceup cards
         for(Hand hand : hands){
             System.out.print("You have "); 
             for(Card card : hand.hand){
-                if(card.faceUp = true){System.out.print("a " + card.number + " of " + card.suit + ", ");}
+                if(card.faceUp){System.out.print("a " + card.number + " of " + card.suit + ", ");}
             }
             System.out.println();
         }
@@ -47,5 +55,13 @@ public class Player {
     
     public Hand getSecondHand(){
         return hands.get(1);
+    }
+    
+    public void turnOverFaceDownCards(){
+        for(Hand hand : hands){
+            for(Card card : hand.hand){
+                if(!card.faceUp){card.faceUp = true;}
+            }
+        }
     }
 }
