@@ -25,7 +25,7 @@ public class Main {
             }
             playerMakesBet(scan, player);
             initialDeal(player, dealer);
-            initialPlay2(scan, player, dealer);
+            initialPlay(scan, player, dealer);
         }
         scan.close();
     }
@@ -46,6 +46,7 @@ public class Main {
     
     public void initialDeal(Player player, Dealer dealer){
         dealer.hand.clear();  //maybe put this in a seperate method
+        dealer.hand.bust = false;
         player.natural = false;
         dealer.natural = false;
         player.getFirstHand().add(deck.get(0), true); 
@@ -63,7 +64,7 @@ public class Main {
         player.checkIfFirstHandCanBeSplit();
     }
     
-    public void initialPlay2(Scanner scan, Player player, Dealer dealer){
+    public void initialPlay(Scanner scan, Player player, Dealer dealer){
         //first see if dealers faceup card is ace, if so, player can make an insurance bet
         if(dealer.getFaceUpCard().ace){
             System.out.println("Would you like to make an insurance bet?");
@@ -144,6 +145,7 @@ public class Main {
                     hit(hand, false);
                     player.seeCards();
                     hand.doubled = true;
+                    hand.checkBust();
                     break;
                 }
                 else if(choice.equals("split")){ 
@@ -152,6 +154,8 @@ public class Main {
                         hit(player.getFirstHand(), true);
                         hit(player.getSecondHand(), true);
                         player.seeCards();
+                        player.getFirstHand().checkBust();
+                        player.getSecondHand().checkBust();
                         break;
                     }
                     else{
@@ -181,12 +185,14 @@ public class Main {
     
     public void dealersPlay(Player player, Dealer dealer, Hand playerHand){
         dealer.turnOverFaceDownCard();
+        dealer.seeCards();
         while(!dealer.hand.bust){
             if(dealer.hand.getTotalScore() >= 17){
                 break;
             }
             else{
                 hit(dealer.hand, true);
+                System.out.println("Dealer hits"); 
                 dealer.seeCards();
             }
             dealer.hand.checkBust();
@@ -209,93 +215,6 @@ public class Main {
             System.out.println("Standoff");
             player.chips += playerHand.bet;
             System.out.println("Chips left: " + player.chips);
-        }
-    }
-    
-    public void initialPlay(Scanner scan, Player player, Dealer dealer){
-        
-        //If dealer has an ace faceup then player can make insurance bet if dealers face down card is a ten
-        if(dealer.hand.hand.get(0).ace){
-            int insurance = 0;
-            System.out.println("Dealer has an ace, would you like to make an insurance bet?");
-            String choice = scan.next();
-            while (!"yes".equals(choice) && !"no".equals(choice)){
-                System.out.println("Enter 'yes' or 'no'");
-                choice = scan.next();
-            }
-            if(choice.equals("yes")){
-                System.out.println("Enter how much you would like to bet");
-                insurance = scan.nextInt();
-                while (insurance <= 0 || insurance > player.chips){
-                    System.out.println("You must enter a valid amount");
-                    insurance = scan.nextInt();
-                }
-                player.chips -= insurance;
-                System.out.println("Chips left: " + player.chips);
-            }
-            System.out.println("The dealer checks the hole card"); 
-            if(dealer.hand.hand.get(1).ten){
-                dealer.hand.hand.get(1).faceUp = true;
-                System.out.println("The card is a ten");
-                System.out.println("You win double your insurance bet");
-                player.chips += insurance * 3;
-                System.out.println("Chips left: " + player.chips);
-            }
-            else{
-                System.out.println("The card is not a ten");
-                System.out.println("You lose your insurance bet");
-            }
-        }
-        else if(dealer.hand.hand.get(0).ten){
-            System.out.println("The dealer has a ten");
-            System.out.println("The dealer looks at the hole card");
-            if(dealer.hand.hand.get(1).ace){
-                dealer.hand.hand.get(1).faceUp = true;
-                System.out.println("The dealer has a natural");
-                if(player.hand.checkNatural()){
-                    System.out.println("You have a natural too");
-                    System.out.println("Standoff: Your bet is returned to you");
-                    player.chips += player.hand.bet;
-                    System.out.println("Chips left: " + player.chips);
-                }
-                else{
-                    System.out.println("You have lost this hand");
-                }
-            }
-            else{
-                System.out.println("The dealer does not have an ace");
-                firstPlay(player, dealer, scan);
-            }
-        }
-        else{
-            if(player.hand.checkNatural()){
-                System.out.println("You have a natural, you win");
-                System.out.println("You receive 1.5 times your bet in winnings");
-                player.chips += player.hand.bet * 2.5;
-                System.out.println("Chips left: " + player.chips);
-            }
-            else{
-                firstPlay(player, dealer, scan);
-            }
-        }
-        player.hand.clear();
-        dealer.hand.clear();
-    }
-    
-    public void firstPlay(Player player, Dealer dealer, Scanner scan){
-        while(!player.hand.bust){
-            System.out.println(player.hand.makeMove());
-            String choice = scan.next();
-            while (!"stand".equals(choice) && !"hit".equals(choice) && !"double".equals(choice) && !"split".equals(choice)){
-                System.out.println("Enter a valid decision");
-                choice = scan.next();
-            }
-            if(choice.equals("stand")){break;}
-            else if(choice.equals("hit")){
-                player.hand.add(deck.get(0), true); 
-                deck.remove(0);
-                System.out.println(player.hand.hand.get(player.hand.hand.size() - 1).number + " of " + player.hand.hand.get(player.hand.hand.size() - 1).suit); 
-            }
         }
     }
     
