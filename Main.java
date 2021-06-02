@@ -1,19 +1,67 @@
 package Twenty_One;
 
+import java.awt.*;
+import java.awt.image.*;
 import java.io.*;
 import java.util.*;
+import javax.imageio.*;
+import javax.swing.*;
 
-public class Main {
+public class Main extends JPanel{
     ArrayList<Card> deck = new ArrayList<>();
     ArrayList<Card> fullDeck = new ArrayList<>();
+    BufferedImage image;
+    int[] card;
     
-    
-    public static void main(String[] args) throws IOException{
+    public static void main(String[] args) throws IOException{ //play runs out when chips greater than 1 - ok, but if no chips left, can still double - will go into minus chips
         Main game = new Main();
+        
+        JFrame frame = new JFrame();
+        frame.add(game);
+        frame.setSize(1400, 750);
+        game.setLayout(new FlowLayout());
+        game.setupScreen(game); 
+        
+        frame.setVisible(true);
+        //game.changeDeck();
         Player player = new Player(10000);
         Dealer dealer = new Dealer();
         game.getDeck();
-        game.run(player, dealer);
+        game.getCardImages();
+        //game.run(player, dealer);
+        
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
+    }
+    
+    public void paintComponent(Graphics g){
+        super.paintComponent(g); 
+        try{
+            g.drawImage(image, card[0], card[1], card[2], card[3], card[0], card[1], card[2], card[3], null);
+        }catch(Exception e){}
+    }
+    
+    public void getCardImages(){
+        try {
+            File input = new File("cards.jpg");
+            image = ImageIO.read(input);
+        }
+        catch (Exception e) {System.out.println(e);}
+        card = new int[]{fullDeck.get(17).x1, fullDeck.get(17).y1, fullDeck.get(17).x2, fullDeck.get(17).y2};
+        repaint();
+    }
+    
+    public void setupScreen(JPanel game){ //could be condensed?
+        JButton hit = new JButton("hit");
+        JButton stand = new JButton("stand");
+        JButton Double = new JButton("double");
+        JButton split = new JButton("split");
+        //hit.setLocation(100, 100); 
+        //stand.setLocation(WIDTH, WIDTH);
+        game.add(hit);
+        game.add(stand);
+        game.add(Double);
+        game.add(split);
     }
 
     public void run(Player player, Dealer dealer){
@@ -220,13 +268,31 @@ public class Main {
     
     public void getDeck() throws FileNotFoundException, IOException{  //shuffles 6 decks of cards to be used
         for(int i = 0; i < 6; i++){
-            BufferedReader reader = new BufferedReader(new FileReader("Deck.txt"));
+            BufferedReader reader = new BufferedReader(new FileReader("Deck2.txt"));
             for (int j = 0; j < 52; j++){                                                          
-                String[] line = reader.readLine().split("[:]");                                                
-                Card one = new Card(line[0], line[1], Integer.valueOf(line[2]));                                     
+                String[] line = reader.readLine().split("[:]");   
+                Card one = new Card(line[0], line[1], Integer.valueOf(line[2]), Integer.valueOf(line[3]), Integer.valueOf(line[4]), Integer.valueOf(line[5]), Integer.valueOf(line[6]));                                     
                 fullDeck.add(one);
             }
             reader.close();
         }
+    }
+    //g.drawImage(image, 74, 99, 146, 195, 74, 99, 146, 195, null);
+    public void changeDeck() throws FileNotFoundException, IOException{
+        BufferedReader reader = new BufferedReader(new FileReader("Deck.txt"));
+        String[] line = reader.readLine().split("[:]");   
+        int x1d = Integer.valueOf(line[3]) - 74;
+        int y1d = Integer.valueOf(line[4]) - 99;
+        int x2d = Integer.valueOf(line[5]) - 146;
+        int y2d = Integer.valueOf(line[6]) - 195;
+        
+        PrintStream one = new PrintStream(new File("Deck2.txt"));
+        one.append(line[0] + ":" +  line[1] + ":" + line[2] + ":" + (Integer.valueOf(line[3]) - x1d) + ":" + (Integer.valueOf(line[4]) - y1d) + ":" + (Integer.valueOf(line[5]) - x2d) + ":" + (Integer.valueOf(line[6]) - y2d) + "\r\n");
+        for(int i = 0; i < 51; i++){
+            line = reader.readLine().split("[:]"); 
+            one.append(line[0] + ":" +  line[1] + ":" + line[2] + ":" + (Integer.valueOf(line[3]) - x1d) + ":" + (Integer.valueOf(line[4]) - y1d) + ":" + (Integer.valueOf(line[5]) - x2d) + ":" + (Integer.valueOf(line[6]) - y2d) + "\r\n");
+        }
+        
+        reader.close();
     }
 }
