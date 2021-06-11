@@ -2,15 +2,11 @@ package Twenty_One;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.geom.Ellipse2D;
 import java.awt.image.*;
 import java.io.*;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.imageio.*;
 import javax.swing.*;
-import javax.swing.border.Border;
 
 public class Main extends JPanel implements ActionListener{
     ArrayList<Card> deck = new ArrayList<>();
@@ -22,26 +18,15 @@ public class Main extends JPanel implements ActionListener{
     ArrayList<Card> playerFirstCards = new ArrayList<>();
     ArrayList<Card> playerSecondCards = new ArrayList<>();
     
-    JButton hit, stand, Double, split, ok;
+    JButton hit, stand, Double, split, Bet, Chip1, Chip5, Chip10, Chip25, Chip50, Chip100, Chip500, Chip1000;
     JTextArea display;
     JTextField entry;
-    
-    JButton Chip1; 
-    JButton Chip5; 
-    JButton Chip10;
-    JButton Chip25; 
-    JButton Chip50; 
-    JButton Chip100; 
-    JButton Chip500; 
-    JButton Chip1000; 
+    JLabel labelBet;
+    JLabel labelChips;
+    JLabel chips;
     
     Boolean readyToBet = false;
     int bet;
-    
-    GridBagLayout thelayout;
-    GridBagConstraints gbc;
-    
-    GridLayout layout;
     
     Boolean readyToMove = false;
     int hand;
@@ -49,7 +34,8 @@ public class Main extends JPanel implements ActionListener{
     Player player;
     Dealer dealer;
     
-    
+    ArrayList<JButton> moveButtons;
+    ArrayList<JButton> chipButtons;
     
     public Main() throws IOException{
         JFrame frame = new JFrame();
@@ -71,20 +57,6 @@ public class Main extends JPanel implements ActionListener{
     public static void main(String[] args) throws IOException{ 
     //play runs out when chips greater than 1 - ok, but if no chips left, can still double - will go into minus chips
         Main game = new Main();
-        
-        /*JFrame frame = new JFrame();
-        frame.add(game);
-        frame.setSize(1020, 750); 
-        game.setupScreen(game); */
-        
-        //frame.setVisible(true);
-        //game.changeDeck();
-        
-        /*game.getDeck();
-        game.getCardImages();
-        game.run(player, dealer);
-        
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);*/
         
     }
     
@@ -123,68 +95,26 @@ public class Main extends JPanel implements ActionListener{
     }
     
     public void setupScreen(){ //could be condensed?
-        //thelayout = new GridBagLayout();
-        //gbc = new GridBagConstraints();
-        //this.setLayout(thelayout);
-        
-        //layout = new GridLayout(6, 5, 50, 50);
         this.setLayout(null); 
+        moveButtons = new ArrayList<>();
+        chipButtons = new ArrayList<>();      
         
-        ImageIcon chip1 = new ImageIcon("1 chip.jpg"); 
-        ImageIcon chip5 = new ImageIcon("5 chip.jpg"); 
-        ImageIcon chip10 = new ImageIcon("10 chip.jpg"); 
-        ImageIcon chip25 = new ImageIcon("25 chip.jpg"); 
-        ImageIcon chip50 = new ImageIcon("50 chip.jpg"); 
-        ImageIcon chip100 = new ImageIcon("100 chip.jpg");  
-        ImageIcon chip500 = new ImageIcon("500 chip.jpg"); 
-        ImageIcon chip1000 = new ImageIcon("1000 chip.jpg"); 
+        hit = createButtons(hit, "hit.jpg", 80, 480, 70, 40, false, moveButtons);
+        stand = createButtons(stand, "stand.jpg", 200, 480, 137, 38, false, moveButtons);
+        Double = createButtons(Double, "double.jpg", 400, 480, 170, 40, false, moveButtons);
+        split = createButtons(split, "split.jpg", 600, 480, 114, 40, false, moveButtons);
+        Bet = createButtons(Bet, "bet.jpg", 120, 80, 132, 68, true, chipButtons);
+        Chip1 = createButtons(Chip1, "1 chip.jpg", 30, 570, 114, 114, true, chipButtons);
+        Chip5 = createButtons(Chip5, "5 chip.jpg", 150, 570, 113, 116, true, chipButtons);
+        Chip10 = createButtons(Chip10, "10 chip.jpg", 270, 570, 114, 116, true, chipButtons);
+        Chip25 = createButtons(Chip25, "25 chip.jpg", 390, 570, 113, 114, true, chipButtons);
+        Chip50 = createButtons(Chip50, "50 chip.jpg", 510, 570, 114, 114, true, chipButtons);
+        Chip100 = createButtons(Chip100, "100 chip.jpg", 630, 570, 114, 114, true, chipButtons);
+        Chip500 = createButtons(Chip500, "500 chip.jpg", 750, 570, 116, 116, true, chipButtons);
+        Chip1000 = createButtons(Chip1000, "1000 chip.jpg", 870, 570, 114, 116, true, chipButtons);
         
-        hit = new JButton("hit");
-        stand = new JButton("stand");
-        Double = new JButton("double");
-        split = new JButton("split");
-        ok = new JButton("ok");
-        Chip1 = new JButton(chip1);
-        Chip5 = new JButton(chip5);
-        Chip10 = new JButton(chip10);
-        Chip25 = new JButton(chip25);
-        Chip50 = new JButton(chip50);
-        Chip100 = new JButton(chip100);
-        Chip500 = new JButton(chip500);
-        Chip1000 = new JButton(chip1000);
-        
-        //gbc.anchor = GridBagConstraints.FIRST_LINE_START;
-        //gbc.fill = GridBagConstraints.BOTH;
-        
-        /*addobjects(hit, this, thelayout, gbc, 1, 4, 1, 1, 0, 0, 0, 0);
-        addobjects(stand, this, thelayout, gbc, 2, 4, 1, 1, 0, 0, 0, 0);
-        addobjects(Double, this, thelayout, gbc, 3, 4, 1, 1, 0, 0, 0, 0);
-        addobjects(split, this, thelayout, gbc, 4, 4, 1, 1, 0, 0, 0, 0);
-        
-        addobjects(Chip1, this, thelayout, gbc, 0, 4, 1, 1, 0, 0, 0, 0);
-        addobjects(Chip5, this, thelayout, gbc, 0, 5, 1, 1, 0, 0, 0, 0);
-        addobjects(Chip10, this, thelayout, gbc, 1, 5, 1, 1, 0, 0, 0, 0);
-        addobjects(Chip25, this, thelayout, gbc, 2, 5, 1, 1, 0, 0, 0, 0);
-        addobjects(Chip50, this, thelayout, gbc, 3, 5, 1, 1, 0, 0, 0, 0);
-        addobjects(Chip100, this, thelayout, gbc, 4, 5, 1, 1, 0, 0, 0, 0);
-        addobjects(Chip500, this, thelayout, gbc, 5, 5, 1, 1, 0, 0, 0, 0);
-        addobjects(Chip1000, this, thelayout, gbc, 5, 4, 1, 1, 0, 0, 0, 0);*/
-                
-        //hit.setLocation(100, 100); 
-        //stand.setLocation(WIDTH, WIDTH);
-        this.add(hit); hit.addActionListener(this);
-        this.add(stand); stand.addActionListener(this);
-        this.add(Double); Double.addActionListener(this);
-        this.add(split); split.addActionListener(this); 
-        this.add(ok); ok.addActionListener(this); 
-        this.add(Chip1); Chip1.addActionListener(this); Chip1.setBounds(30, 550, 120, 120);
-        this.add(Chip5); Chip5.addActionListener(this); Chip5.setBounds(150, 550, 120, 120);
-        this.add(Chip10); Chip10.addActionListener(this); Chip10.setBounds(270, 550, 120, 120);
-        this.add(Chip25); Chip25.addActionListener(this); Chip25.setBounds(390, 550, 120, 120);
-        this.add(Chip50); Chip50.addActionListener(this); Chip50.setBounds(510, 550, 120, 120);
-        this.add(Chip100); Chip100.addActionListener(this); Chip100.setBounds(630, 550, 120, 120);
-        this.add(Chip500); Chip500.addActionListener(this); Chip500.setBounds(750, 550, 120, 120);
-        this.add(Chip1000); Chip1000.addActionListener(this); Chip1000.setBounds(870, 550, 120, 120);
+        labelBet = createLabels(labelBet, 880, 500, 60, 20);
+        labelChips = createLabels(labelChips, 880, 520, 100, 20);
         
         display = new JTextArea(5,10); display.setLineWrap(true); display.setWrapStyleWord(true);
         display.setBounds(700, 200, 100, 50); 
@@ -192,26 +122,32 @@ public class Main extends JPanel implements ActionListener{
         entry.setBounds(700, 300, 50, 20);
         this.add(display); 
         this.add(entry); 
-        //addobjects(display, this, thelayout, gbc, 5, 0, 1, 1, 20, 0, 50, 0);
-        //addobjects(entry, this, thelayout, gbc, 5, 2, 1, 1, 20, 0, 50, 0);
         
-        //Chip1.setLocation(500, 20);
-        
-        repaint();
+        //repaint(); //is this necessary
     }
     
-    public void addobjects(Component componente, Container yourcontainer, GridBagLayout layout, GridBagConstraints gbc, int gridx, int gridy, int gridwidth, int gridheight, int insetsTop, int insetsLeft,int insetsBottom,int insetsRight){
-
-        gbc.gridx = gridx;
-        gbc.gridy = gridy;
-
-        gbc.gridwidth = gridwidth;
-        gbc.gridheight = gridheight;
-        
-        gbc.insets = new Insets(insetsTop, insetsLeft, insetsBottom, insetsRight);
-
-        layout.setConstraints(componente, gbc);
-        yourcontainer.add(componente);
+    public JButton createButtons(JButton button, String file, int x, int y, int width, int height, Boolean visible, ArrayList<JButton> group){ //creates buttons, uses file as imageicon, set bounds
+        ImageIcon image = new ImageIcon(file);
+        button = new JButton(image);
+        button.setBounds(x, y, width, height); 
+        button.setVisible(visible);
+        group.add(button);
+        this.add(button);
+        button.addActionListener(this);
+        return button;
+    }
+    
+    public JLabel createLabels(JLabel label, int x, int y, int width, int height){
+        label = new JLabel(); 
+        label.setBounds(x, y, width, height); 
+        this.add(label);
+        return label;
+    }
+    
+    public void changeButtonVisibility(ArrayList<JButton> list, Boolean visibile){
+        for(JButton button : list){
+            button.setVisible(visibile);
+        }
     }
     
     public void actionPerformed(ActionEvent e) {
@@ -227,12 +163,6 @@ public class Main extends JPanel implements ActionListener{
         }
         else if(e.getSource() == split){
             
-        }
-        else if(e.getSource() == ok){
-            if(readyToBet){
-                bet = Integer.valueOf(entry.getText()); 
-                readyToBet = false;
-            }
         }
         else if (e.getSource() == Chip1){
             bet += 1;
@@ -305,9 +235,13 @@ public class Main extends JPanel implements ActionListener{
         //player.hand.bet = bet;
         player.chips -= bet;
         System.out.println("Chips left: " + player.chips);
+        changeButtonVisibility(chipButtons, false);
+        labelBet.setText("BET: " + bet);    
+        labelChips.setText("Chips: " + player.chips);
     }
     
     public void initialDeal(Player player, Dealer dealer){
+        changeButtonVisibility(moveButtons, true);
         dealer.hand.clear();  //maybe put this in a seperate method
         dealer.hand.bust = false;
         player.natural = false;
@@ -347,6 +281,7 @@ public class Main extends JPanel implements ActionListener{
                 player.chips -= player.insuranceBet;
                 player.insurance = true;
                 System.out.println("Chips left: " + player.chips);
+                labelChips.setText("Chips: " + player.chips);
             }
         }
         //if face up card is ace of ten card, dealer checks facedown card
@@ -360,6 +295,7 @@ public class Main extends JPanel implements ActionListener{
                     System.out.println("You win twice your insurance bet");
                     player.chips += player.insuranceBet * 3;
                     System.out.println("Chips left: " + player.chips);
+                    labelChips.setText("Chips: " + player.chips);
                     player.insurance = false;
                 }
             }
@@ -375,11 +311,13 @@ public class Main extends JPanel implements ActionListener{
             System.out.println("Standoff: Your bet is returned to you");
             player.chips += player.getFirstHand().bet;
             System.out.println("Chips left: " + player.chips);
+            labelChips.setText("Chips: " + player.chips);
         }
         else if(player.natural && !dealer.natural){ //player wins
             System.out.println("You receive 1.5 times your bet in winnings");
             player.chips += player.getFirstHand().bet * 2.5;
             System.out.println("Chips left: " + player.chips);
+            labelChips.setText("Chips: " + player.chips);
         }
         else{
             play(player, dealer, scan);
@@ -465,6 +403,7 @@ public class Main extends JPanel implements ActionListener{
             System.out.println("Dealer is bust, you win");
             player.chips += 2 * playerHand.bet;
             System.out.println("Chips left: " + player.chips);
+            labelChips.setText("Chips: " + player.chips);
         }
         //settlement
         else if(dealer.hand.getTotalScore() > playerHand.getTotalScore()){
@@ -474,11 +413,13 @@ public class Main extends JPanel implements ActionListener{
             System.out.println("You win");
             player.chips += 2 * playerHand.bet;
             System.out.println("Chips left: " + player.chips);
+            labelChips.setText("Chips: " + player.chips);
         }
         else if(dealer.hand.getTotalScore() == playerHand.getTotalScore()){
             System.out.println("Standoff");
             player.chips += playerHand.bet;
             System.out.println("Chips left: " + player.chips);
+            labelChips.setText("Chips: " + player.chips);
         }
     }
     
@@ -493,23 +434,4 @@ public class Main extends JPanel implements ActionListener{
             reader.close();
         }
     }
-    //g.drawImage(image, 74, 99, 146, 195, 74, 99, 146, 195, null);
-    public void changeDeck() throws FileNotFoundException, IOException{
-        BufferedReader reader = new BufferedReader(new FileReader("Deck.txt"));
-        String[] line = reader.readLine().split("[:]");   
-        int x1d = Integer.valueOf(line[3]) - 74;
-        int y1d = Integer.valueOf(line[4]) - 99;
-        int x2d = Integer.valueOf(line[5]) - 146;
-        int y2d = Integer.valueOf(line[6]) - 195;
-        
-        PrintStream one = new PrintStream(new File("Deck2.txt"));
-        one.append(line[0] + ":" +  line[1] + ":" + line[2] + ":" + (Integer.valueOf(line[3]) - x1d) + ":" + (Integer.valueOf(line[4]) - y1d) + ":" + (Integer.valueOf(line[5]) - x2d) + ":" + (Integer.valueOf(line[6]) - y2d) + "\r\n");
-        for(int i = 0; i < 51; i++){
-            line = reader.readLine().split("[:]"); 
-            one.append(line[0] + ":" +  line[1] + ":" + line[2] + ":" + (Integer.valueOf(line[3]) - x1d) + ":" + (Integer.valueOf(line[4]) - y1d) + ":" + (Integer.valueOf(line[5]) - x2d) + ":" + (Integer.valueOf(line[6]) - y2d) + "\r\n");
-        }
-        
-        reader.close();
-    }
-
 }
