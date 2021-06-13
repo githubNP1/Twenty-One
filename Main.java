@@ -35,6 +35,8 @@ public class Main extends JPanel implements ActionListener{
     Player player;
     Dealer dealer;
     
+    Boolean hitBo, standBo, doubleBo, splitBo;
+    
     ArrayList<JButton> moveButtons;
     ArrayList<JButton> chipButtons;
     ArrayList<JButton> ynButtons;
@@ -158,19 +160,35 @@ public class Main extends JPanel implements ActionListener{
         }
     }
     
+    public void moveButtonVisibility(ArrayList<String> list){
+        if(list.contains("hit")){
+            hit.setVisible(true);
+        }
+        if(list.contains("stand")){
+            stand.setVisible(true);
+        }
+        if(list.contains("double")){
+            Double.setVisible(true);
+        }
+        if(list.contains("split")){
+            split.setVisible(true);
+        }
+    }
+    
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == hit && readyToMove){
-            hit(player.hands.get(hand), true); 
+            //hit(player.hands.get(hand), true); 
+            hitBo = true;
             readyToMove = false;
         }
-        else if(e.getSource() == stand){
-            
+        else if(e.getSource() == stand && readyToMove){
+            standBo = true;
         }
-        else if (e.getSource() == Double){
-            
+        else if (e.getSource() == Double && readyToMove){
+            doubleBo = true;
         }
-        else if(e.getSource() == split){
-            
+        else if(e.getSource() == split && readyToMove){
+            splitBo = true;
         }
         else if(e.getSource() == yes){
             y = true;
@@ -337,51 +355,40 @@ public class Main extends JPanel implements ActionListener{
         //for every hand
         for(Hand hand : player.hands){
             this.hand = player.hands.indexOf(hand); 
-            hand.checkBust();
+            //hand.checkBust();
             while(!hand.bust){
-                System.out.println(hand.makeMove());
-                String choice = scan.next();
-                while (!hand.moveChoices().contains(choice)){ 
-                    System.out.println("Enter a valid decision");
-                    choice = scan.next();
-                } //readyToMove = true;
-                if(choice.equals("stand")){break;}
-                else if(choice.equals("hit")){ //make hit its own method
-                    hit(hand, true);
-                    player.seeCards(); repaint();
+                hitBo = false; standBo = false; doubleBo = false; splitBo = false;
+                moveButtonVisibility(hand.moveChoices());
+                while(!hitBo && !standBo && !doubleBo && !splitBo){
+                    try{Thread.sleep(200);} catch (InterruptedException ex) {}
                 }
-                else if(choice.equals("double")){
-                    player.chips -= hand.bet;
-                    hand.bet *= 2;
-                    hit(hand, false);
-                    player.seeCards(); repaint();
-                    hand.doubled = true;
+                changeButtonVisibility(moveButtons, false);
+                if(hitBo){
+                    hit(hand, true);
                     hand.checkBust();
+                }
+                else if(standBo){
                     break;
                 }
-                else if(choice.equals("split")){ 
+                else if(doubleBo){
+                    Double(hand);
+                }
+                else if(splitBo){
                     if(hand.hand.get(0).ace){
-                        player.split();
-                        hit(player.getFirstHand(), true);
-                        hit(player.getSecondHand(), true);
-                        player.seeCards(); repaint();
-                        player.getFirstHand().checkBust();
-                        player.getSecondHand().checkBust();
+                        split();
                         break;
                     }
                     else{
-                        player.split();
-                        hit(player.getFirstHand(), true);
-                        hit(player.getSecondHand(), true);
-                        player.seeCards(); repaint();
+                        split();
                     }
                 }
+                hitBo = false; standBo = false; doubleBo = false; splitBo = false;
             }
         }
         player.turnOverFaceDownCards();
         for(Hand hand : player.hands){
             if(hand.bust){
-                System.out.println("You are bust, dealer wins");
+                display.setText("You are bust, dealer wins");
             }
             else{
                 dealersPlay(player, dealer, hand);
@@ -389,45 +396,56 @@ public class Main extends JPanel implements ActionListener{
         }
     }
     
+    public void Double(Hand hand){
+        player.chips -= hand.bet;
+        hand.bet *= 2;
+        hit(hand, false);
+        hand.doubled = true;
+    }
+    
+    public void split(){ 
+        player.split();
+        hit(player.getFirstHand(), true);
+        hit(player.getSecondHand(), true);
+    }
+    
     public void hit(Hand hand, Boolean faceUp){
         hand.add(deck.get(0), true); 
+        repaint();
         deck.remove(0);
+        hand.checkBust();
     }
     
     public void dealersPlay(Player player, Dealer dealer, Hand playerHand){
         dealer.turnOverFaceDownCard();
-        dealer.seeCards(); repaint();
+        repaint();
         while(!dealer.hand.bust){
             if(dealer.hand.getTotalScore() >= 17){
                 break;
             }
             else{
                 hit(dealer.hand, true);
-                System.out.println("Dealer hits"); 
-                dealer.seeCards(); repaint();
+                display.setText("Dealer hits"); 
             }
             dealer.hand.checkBust();
         }
         if(dealer.hand.bust){
-            System.out.println("Dealer is bust, you win");
+            display.setText("Dealer is bust, you win");
             player.chips += 2 * playerHand.bet;
-            System.out.println("Chips left: " + player.chips);
             labelChips.setText("CHIPS: " + player.chips);
         }
         //settlement
         else if(dealer.hand.getTotalScore() > playerHand.getTotalScore()){
-            System.out.println("Dealer wins");
+            display.setText("Dealer wins");
         }
         else if(dealer.hand.getTotalScore() < playerHand.getTotalScore()){
-            System.out.println("You win");
+            display.setText("You win");
             player.chips += 2 * playerHand.bet;
-            System.out.println("Chips left: " + player.chips);
             labelChips.setText("CHIPS: " + player.chips);
         }
         else if(dealer.hand.getTotalScore() == playerHand.getTotalScore()){
-            System.out.println("Standoff");
+            display.setText("Standoff");
             player.chips += playerHand.bet;
-            System.out.println("Chips left: " + player.chips);
             labelChips.setText("CHIPS: " + player.chips);
         }
     }
