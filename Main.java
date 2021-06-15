@@ -25,6 +25,9 @@ public class Main extends JPanel implements ActionListener{
     JLabel labelSecondBet;
     JLabel labelChips;
     JLabel labelInsuranceBet;
+    JLabel dealerScore;
+    JLabel firstScore;
+    JLabel secondScore;
     
     Boolean makingInsuranceBet = false;
     
@@ -133,6 +136,9 @@ public class Main extends JPanel implements ActionListener{
         labelChips = createLabels(labelChips, "CHIPS: ", player.chips, 880, 540, 100, 20);
         labelInsuranceBet = createLabels(labelInsuranceBet, "INSURANCE: ", player.insuranceBet, 880, 500, 200, 20);
         labelSecondBet = createLabels(labelSecondBet, "SECOND BET: ", bet, 880, 480, 200, 20);
+        dealerScore = createScoreLabels(dealerScore, "DEALER SCORE: ", 400, 180, 250, 20);
+        firstScore = createScoreLabels(firstScore, "FIRST HAND SCORE: ", 80, 370, 300, 20);
+        secondScore = createScoreLabels(secondScore, "SECOND HAND SCORE: ", 400, 370, 300, 20);
         
         display = new JTextArea(); 
         display.setLineWrap(true); 
@@ -157,6 +163,14 @@ public class Main extends JPanel implements ActionListener{
         label = new JLabel(text + text2); 
         label.setBounds(x, y, width, height); 
         this.add(label);
+        return label;
+    }
+    
+    public JLabel createScoreLabels(JLabel label, String text, int x, int y, int width, int height){
+        label = new JLabel(text); 
+        label.setBounds(x, y, width, height); 
+        this.add(label);
+        label.setVisible(false); 
         return label;
     }
     
@@ -326,6 +340,10 @@ public class Main extends JPanel implements ActionListener{
         player.natural = false;
         dealer.natural = false;
         labelSecondBet.setVisible(false);
+        dealerScore.setText("DEALER SCORE: ");
+        firstScore.setText("FIRST HAND SCORE: ");
+        secondScore.setText("SECOND HAND SCORE: ");
+        secondScore.setVisible(false); 
     }
     
     public void initialDeal(Player player, Dealer dealer){
@@ -336,9 +354,13 @@ public class Main extends JPanel implements ActionListener{
         deck.removeIf(n -> (deck.indexOf(n) >= 0 && deck.indexOf(n) <= 3)); 
         playerFirstCards = player.getFirstHand().hand; 
         repaint();
+        firstScore.setVisible(true);
+        firstScore.setText("FIRST HAND SCORE: " + player.getFirstHand().getVisibleScore());
         if(player.getFirstHand().checkNatural()){player.natural = true; display.setText("You have a natural");}
         dealerCards = dealer.hand.hand; 
         repaint();
+        dealerScore.setVisible(true);
+        dealerScore.setText("DEALER SCORE: " + dealer.hand.getVisibleScore()); 
         player.checkIfFirstHandCanBeSplit();
         pause(2000);
     }
@@ -383,6 +405,7 @@ public class Main extends JPanel implements ActionListener{
             if(dealer.hand.checkNatural()){
                 dealer.natural = true;
                 dealer.turnOverFaceDownCard();
+                dealerScore.setText("DEALER SCORE: " + dealer.hand.getVisibleScore()); 
                 repaint();
                 display.setText("The dealer has a natural");
                 pause(2000);
@@ -420,14 +443,16 @@ public class Main extends JPanel implements ActionListener{
         }
         labelChips.setText("CHIPS: " + player.chips);
         labelBet.setText("BET: ");
-        labelBet.setText("SECOND BET: ");
+        labelSecondBet.setText("SECOND BET: ");
         labelInsuranceBet.setText("INSURANCE: "); 
         nextRoundKey();
     }
     
     public void play(Player player, Dealer dealer, Scanner scan){
         hand = player.getFirstHand();
+        display.setText("First hand");
         while(!hand.checkForBust() && !hand.twentyOne()){
+            firstScore.setText("FIRST HAND SCORE: " + hand.getVisibleScore());
             hitBo = false; standBo = false; doubleBo = false; splitBo = false;
             moveButtonVisibility(hand.moveChoices());
             while(!hitBo && !standBo && !doubleBo && !splitBo){
@@ -456,10 +481,12 @@ public class Main extends JPanel implements ActionListener{
             }
             hitBo = false; standBo = false; doubleBo = false; splitBo = false;
         }
-        
+        firstScore.setText("FIRST HAND SCORE: " + hand.getVisibleScore());
         if(player.hands.size() == 2){
+            display.setText("Second hand");
             hand = player.getSecondHand();
             while(!hand.checkForBust() && !hand.twentyOne()){
+                secondScore.setText("SECOND HAND SCORE: " + hand.getVisibleScore()); 
                 hitBo = false; standBo = false; doubleBo = false; splitBo = false;
                 moveButtonVisibility(hand.moveChoices());
                 while(!hitBo && !standBo && !doubleBo && !splitBo){
@@ -489,11 +516,14 @@ public class Main extends JPanel implements ActionListener{
                 hitBo = false; standBo = false; doubleBo = false; splitBo = false;
             }
         }
-        
+        secondScore.setText("SECOND HAND SCORE: " + hand.getVisibleScore()); 
         player.turnOverFaceDownCards();
+        hand.checkForBust();
+        firstScore.setText("FIRST HAND SCORE: " + hand.getVisibleScore());
+        secondScore.setText("SECOND HAND SCORE: " + hand.getVisibleScore()); 
         for(Hand hand : player.hands){
             pause(2000);
-            if(hand.checkForBust()){
+            if(hand.checkForBust()){  //cannot use check for bust in if statement - meant for while loop or on its own. necessary for player since player can double, not needed for dealer
                 display.setText("You are bust, dealer wins");
             }
             else{
@@ -507,6 +537,7 @@ public class Main extends JPanel implements ActionListener{
         hand.bet *= 2;
         hit(hand, false);
         hand.doubled = true;
+        hand.checkForBust();
         labelChips.setText("CHIPS: " + player.chips);
         if(hand.equals(player.getFirstHand())){
             labelBet.setText("BET: " + hand.bet);
@@ -526,10 +557,12 @@ public class Main extends JPanel implements ActionListener{
         labelChips.setText("CHIPS: " + player.chips);
         hit(player.getFirstHand(), true);
         hit(player.getSecondHand(), true);
+        secondScore.setText("SECOND HAND SCORE: " + hand.getVisibleScore()); 
+        secondScore.setVisible(true);
     }
     
     public void hit(Hand hand, Boolean faceUp){
-        hand.add(deck.get(0), true); 
+        hand.add(deck.get(0), faceUp); 
         repaint();
         deck.remove(0);
     }
@@ -538,6 +571,7 @@ public class Main extends JPanel implements ActionListener{
         dealer.turnOverFaceDownCard();
         repaint();
         while(!dealer.hand.checkForBust() && !dealer.hand.twentyOne()){
+            dealerScore.setText("DEALER SCORE: " + dealer.hand.getVisibleScore());
             pause(2000);
             if(dealer.hand.getTotalScore() >= 17){
                 break;
@@ -547,6 +581,7 @@ public class Main extends JPanel implements ActionListener{
                 display.setText("Dealer hits"); 
             }
         }
+        dealerScore.setText("DEALER SCORE: " + dealer.hand.getVisibleScore());
         pause(2000);
         if(dealer.hand.checkForBust()){
             display.setText("Dealer is bust, you win");
@@ -588,8 +623,14 @@ public class Main extends JPanel implements ActionListener{
         yes.setVisible(false);
         y = false;
     }
+    
+    public void revertAces(){ //explain why this is needed
+        
+    }            
 }
 // need to make aces have variable value - done
 // player hitting 21 should be auto move on, still asks whether to hit, stand etc. - done
 // insurance bet needs own label - done
-// second hand bet needs own label, plus needs to be clear which hand is currently being played - almost
+// second hand bet needs own label, plus needs to be clear which hand is currently being played - done
+// add scores for hands as its being played
+// score score labels be in paint method
