@@ -28,6 +28,7 @@ public class Player {
         hand.add(getFirstHand().hand.get(1), true);
         getFirstHand().hand.remove(1);
         getFirstHand().splittable = false;
+        
     }
     
     public void seeCards(){ //prints faceup cards
