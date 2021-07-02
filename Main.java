@@ -9,52 +9,29 @@ import javax.imageio.*;
 import javax.swing.*;
 
 public class Main extends JPanel implements ActionListener{
-    ArrayList<Card> deck = new ArrayList<>();
-    ArrayList<Card> fullDeck = new ArrayList<>();
-    BufferedImage cards;
-    BufferedImage table;
-    
-    ArrayList<Card> dealerCards = new ArrayList<>();
-    ArrayList<Card> playerFirstCards = new ArrayList<>();
-    ArrayList<Card> playerSecondCards = new ArrayList<>();
-    
+    ArrayList<Card> deck, fullDeck, dealerCards, playerFirstCards, playerSecondCards;
+    BufferedImage cards, table;
     JButton hit, stand, Double, split, Bet, Chip1, Chip5, Chip10, Chip25, Chip50, Chip100, Chip500, Chip1000, yes, no;
     JTextArea display;
-    
-    JLabel labelBet;
-    JLabel labelSecondBet;
-    JLabel labelChips;
-    JLabel labelInsuranceBet;
-    JLabel dealerScore;
-    JLabel firstScore;
-    JLabel secondScore;
-    
+    JLabel labelBet, labelSecondBet, labelChips, labelInsuranceBet, dealerScore, firstScore, secondScore;
     Boolean makingInsuranceBet = false;
-    
-    Boolean readyToBet = false;
-    int calculatedBet;
-    int bet;
-    Boolean betMade = false;
-    
-    Boolean readyToMove = false;
+    int calculatedBet, bet;
     Hand hand;
-    
     Player player;
     Dealer dealer;
-    
-    Boolean hitBo, standBo, doubleBo, splitBo;
-    
-    ArrayList<JButton> moveButtons;
-    ArrayList<JButton> chipButtons;
-    ArrayList<JButton> ynButtons;
-    
-    Boolean y, n;
+    Boolean hitBo, standBo, doubleBo, splitBo, y, n, splitAce;
+    ArrayList<JButton> moveButtons, chipButtons, ynButtons;
     
     public Main() throws IOException{
         JFrame frame = new JFrame();
         frame.add(this);
         frame.setSize(1020, 750); 
         
+        deck = new ArrayList<>();
+        fullDeck = new ArrayList<>();
+        dealerCards = new ArrayList<>();
+        playerFirstCards = new ArrayList<>();
+        playerSecondCards = new ArrayList<>();
         player = new Player(10000);
         dealer = new Dealer();
         getCardImages();
@@ -68,7 +45,6 @@ public class Main extends JPanel implements ActionListener{
     }
     
     public static void main(String[] args) throws IOException{ 
-    //play runs out when chips greater than 1 - ok, but if no chips left, can still double - will go into minus chips
         Main game = new Main();
     }
     
@@ -110,7 +86,7 @@ public class Main extends JPanel implements ActionListener{
         catch (Exception e) {System.out.println(e);}
     }
     
-    public void setupScreen(){ //could be condensed?
+    public void setupScreen(){ 
         this.setLayout(null); 
         moveButtons = new ArrayList<>();
         chipButtons = new ArrayList<>();      
@@ -294,24 +270,23 @@ public class Main extends JPanel implements ActionListener{
     }
 
     public void run(Player player, Dealer dealer){
-        Scanner scan = new Scanner(System.in); 
-        while(player.chips > 1){
+        while(player.chips > 10){
             if(deck.size() < 30){
-                deck = fullDeck;
+                deck = new ArrayList<>(fullDeck);
                 Collections.shuffle(deck); 
+                display.setText("Deck reshuffled"); 
             }
-            playerMakesBet(scan, player);
+            playerMakesBet(player);
             initialDeal(player, dealer);
-            initialPlay(scan, player, dealer);
+            initialPlay(player, dealer);
         }
-        scan.close();
     }
     
     public void pause(int time){
-        try{Thread.sleep(time/100);} catch (InterruptedException ex) {}
+        try{Thread.sleep(time);} catch (InterruptedException ex) {}
     }
     
-    public void playerMakesBet(Scanner scan, Player player){
+    public void playerMakesBet(Player player){
         reset();
         changeButtonVisibility(chipButtons, true);
         display.setText("Enter how much you would like to bet \n You must enter a valid amount");
@@ -339,11 +314,13 @@ public class Main extends JPanel implements ActionListener{
         dealer.hand.bust = false;
         player.natural = false;
         dealer.natural = false;
+        splitAce = false;
         labelSecondBet.setVisible(false);
         dealerScore.setText("DEALER SCORE: ");
         firstScore.setText("FIRST HAND SCORE: ");
         secondScore.setText("SECOND HAND SCORE: ");
         secondScore.setVisible(false); 
+        revertAces();
     }
     
     public void initialDeal(Player player, Dealer dealer){
@@ -365,7 +342,7 @@ public class Main extends JPanel implements ActionListener{
         pause(2000);
     }
     
-    public void initialPlay(Scanner scan, Player player, Dealer dealer){
+    public void initialPlay(Player player, Dealer dealer){
         //first see if dealers faceup card is ace, if so, player can make an insurance bet
         if(dealer.getFaceUpCard().ace){
             y = false;
@@ -439,7 +416,7 @@ public class Main extends JPanel implements ActionListener{
             display.setText("Dealer wins");
         }
         else{
-            play(player, dealer, scan);
+            play(player, dealer);
         }
         labelChips.setText("CHIPS: " + player.chips);
         labelBet.setText("BET: ");
@@ -448,7 +425,7 @@ public class Main extends JPanel implements ActionListener{
         nextRoundKey();
     }
     
-    public void play(Player player, Dealer dealer, Scanner scan){
+    public void play(Player player, Dealer dealer){
         hand = player.getFirstHand();
         display.setText("First hand");
         while(!hand.checkForBust() && !hand.twentyOne()){
@@ -472,6 +449,7 @@ public class Main extends JPanel implements ActionListener{
             }
             else if(splitBo){
                 if(hand.hand.get(0).ace){
+                    splitAce = true;
                     split(player);
                     break;
                 }
@@ -482,7 +460,7 @@ public class Main extends JPanel implements ActionListener{
             hitBo = false; standBo = false; doubleBo = false; splitBo = false;
         }
         firstScore.setText("FIRST HAND SCORE: " + hand.getVisibleScore());
-        if(player.hands.size() == 2){
+        if(player.hands.size() == 2 && !splitAce){
             display.setText("Second hand");
             hand = player.getSecondHand();
             while(!hand.checkForBust() && !hand.twentyOne()){
@@ -518,12 +496,13 @@ public class Main extends JPanel implements ActionListener{
         }
         secondScore.setText("SECOND HAND SCORE: " + hand.getVisibleScore()); 
         player.turnOverFaceDownCards();
+        player.getFirstHand().checkForBust();
         hand.checkForBust();
-        firstScore.setText("FIRST HAND SCORE: " + hand.getVisibleScore());
+        firstScore.setText("FIRST HAND SCORE: " + player.getFirstHand().getVisibleScore());
         secondScore.setText("SECOND HAND SCORE: " + hand.getVisibleScore()); 
         for(Hand hand : player.hands){
             pause(2000);
-            if(hand.checkForBust()){  //cannot use check for bust in if statement - meant for while loop or on its own. necessary for player since player can double, not needed for dealer
+            if(hand.checkForBust()){  
                 display.setText("You are bust, dealer wins");
             }
             else{
@@ -557,7 +536,7 @@ public class Main extends JPanel implements ActionListener{
         labelChips.setText("CHIPS: " + player.chips);
         hit(player.getFirstHand(), true);
         hit(player.getSecondHand(), true);
-        secondScore.setText("SECOND HAND SCORE: " + hand.getVisibleScore()); 
+        secondScore.setText("SECOND HAND SCORE: " + player.getSecondHand().getVisibleScore()); 
         secondScore.setVisible(true);
     }
     
@@ -624,13 +603,9 @@ public class Main extends JPanel implements ActionListener{
         y = false;
     }
     
-    public void revertAces(){ //explain why this is needed
-        
+    public void revertAces(){ 
+        for(Card card : fullDeck){
+            if(card.value == 1){card.value = 11;}
+        }
     }            
 }
-// need to make aces have variable value - done
-// player hitting 21 should be auto move on, still asks whether to hit, stand etc. - done
-// insurance bet needs own label - done
-// second hand bet needs own label, plus needs to be clear which hand is currently being played - done
-// add scores for hands as its being played
-// score score labels be in paint method
