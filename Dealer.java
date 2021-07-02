@@ -6,7 +6,6 @@ public class Dealer {
     
     public Boolean dealerCheckFaceUpCardForAce(){
         if(hand.hand.get(0).ace){
-            System.out.println("The dealer has an ace");
             return true;
         }
         return false;
@@ -14,7 +13,6 @@ public class Dealer {
     
     public Boolean dealerCheckFaceUpCardForTen(){
         if(hand.hand.get(0).ten){
-            System.out.println("The dealer has a ten card");
             return true;
         }
         return false;
@@ -48,12 +46,6 @@ public class Dealer {
             hand.hand.get(1).faceUp = true;
         }
     }
-    
-    public void seeCards(){  //prints faceup cards
-        System.out.print("The dealer has "); 
-        for(Card card : hand.hand){
-            if(card.faceUp){System.out.print("a " + card.number + " of " + card.suit + ", ");}
-        }
-        System.out.println();
-    } 
 }
+    
+    
