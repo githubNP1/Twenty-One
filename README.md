@@ -14,6 +14,10 @@
 
 - Dealer cannot split or double
 - Dealer just hits until score is 17 and above
+
+- If the dealers face up card is an ace, the player may make an insurance bet
+- Insurance pays 2 to 1
+
 - 5 card charlie rule not being used
 
 - Otherwise standard rules of blackjack apply
