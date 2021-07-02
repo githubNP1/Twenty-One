@@ -7,8 +7,6 @@ public class Hand {
     Boolean bust = false;
     Boolean doubled = false;
     Boolean splittable;
-    //Boolean natural = false;
-    //int score;
     int bet;
     
     public Hand(){}
@@ -34,15 +32,42 @@ public class Hand {
         if(hand.get(0).ace && hand.get(1).ten || hand.get(0).ten && hand.get(1).ace){
             return true;
         }
-        //if(hand.size() == 2 && getTotalScore() == 21){
-        //    return true;
-        //}
         return false;
     }
     
-    public void checkBust(){
+    public Boolean twentyOne(){
+        if(getTotalScore() == 21){
+            return true;
+        }
+        return false;
+    }
+    
+    public Boolean checkBust(){
         if(getTotalScore() > 21){
-            bust = true;
+            return true;
+        }
+        return false;
+    }
+    
+    public Boolean elevenToOne(){  //changes ace card value from 11 to 1
+        for(Card card : hand){
+            if(card.ace && card.value == 11){
+                card.value = 1;
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public Boolean checkForBust(){ //either bust or changes ace from 11 to 1 so no longer bust.
+        if(getTotalScore() <= 21){
+            return false;
+        }
+        else{
+            if(elevenToOne()){
+                return false;
+            }
+            return true;
         }
     }
     
@@ -73,5 +98,15 @@ public class Hand {
         if(!doubled){choices.add("double");}
         if(splittable){choices.add("split");} 
         return choices;
+    }
+    
+    public Integer getVisibleScore(){
+        int score = 0;
+        for (Card card : hand){
+            if(card.faceUp){
+                score += card.value;
+            }
+        }
+        return score;
     }
 }
