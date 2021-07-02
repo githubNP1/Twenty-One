@@ -1,5 +1,5 @@
 # Rules
-- Just run the Main class to start the game
+In order to run the game you will need to add all the pictures in the Picture Folder to the same package as the java files then run the Main class.
 
 - 6 decks are shuffled and used
 - When there are only 30 cards left, the decks are reshuffled and used    
