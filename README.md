@@ -1,4 +1,5 @@
 # Rules
+- Just run the Main class to start the game
 
 - 6 decks are shuffled and used
 - When there are only 30 cards left, the decks are reshuffled and used    
