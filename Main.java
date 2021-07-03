@@ -11,7 +11,7 @@ import javax.swing.*;
 public class Main extends JPanel implements ActionListener{
     ArrayList<Card> deck, fullDeck, dealerCards, playerFirstCards, playerSecondCards;
     BufferedImage cards, table;
-    JButton hit, stand, Double, split, Bet, Chip1, Chip5, Chip10, Chip25, Chip50, Chip100, Chip500, Chip1000, yes, no;
+    JButton hit, stand, Double, split, Bet, Chip1, Chip5, Chip10, Chip25, Chip50, Chip100, Chip500, Chip1000, yes, no, nextRound;
     JTextArea display;
     JLabel labelBet, labelSecondBet, labelChips, labelInsuranceBet, dealerScore, firstScore, secondScore;
     Boolean makingInsuranceBet = false;
@@ -98,7 +98,8 @@ public class Main extends JPanel implements ActionListener{
         split = createButtons(split, "split.jpg", 600, 570, 114, 40, moveButtons);
         yes = createButtons(yes, "yes.jpg", 300, 500, 80, 70, ynButtons);
         no = createButtons(no, "no.jpg", 500, 500, 80, 70, ynButtons);
-        Bet = createButtons(Bet, "bet.jpg", 120, 80, 132, 68, chipButtons);
+        nextRound = createButton(nextRound, "next round.jpg", 400, 450, 230, 48);
+        Bet = createButtons(Bet, "bet.jpg", 400, 400, 132, 68, chipButtons);
         Chip1 = createButtons(Chip1, "1 chip.jpg", 30, 570, 114, 114, chipButtons);
         Chip5 = createButtons(Chip5, "5 chip.jpg", 150, 570, 113, 116, chipButtons);
         Chip10 = createButtons(Chip10, "10 chip.jpg", 270, 570, 114, 116, chipButtons);
@@ -130,6 +131,16 @@ public class Main extends JPanel implements ActionListener{
         button.setBounds(x, y, width, height); 
         button.setVisible(false);
         group.add(button);
+        this.add(button);
+        button.addActionListener(this);
+        return button;
+    }
+    
+    public JButton createButton(JButton button, String file, int x, int y, int width, int height){ //creates buttons, uses file as imageicon, set bounds
+        ImageIcon image = new ImageIcon(file);
+        button = new JButton(image);
+        button.setBounds(x, y, width, height); 
+        button.setVisible(false);
         this.add(button);
         button.addActionListener(this);
         return button;
@@ -173,7 +184,6 @@ public class Main extends JPanel implements ActionListener{
     
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == hit){
-            //hit(player.hands.get(hand), true); 
             hitBo = true;
         }
         else if(e.getSource() == stand){
@@ -190,6 +200,9 @@ public class Main extends JPanel implements ActionListener{
         }
         else if(e.getSource() == no){
             n = true;
+        }
+        else if(e.getSource() == nextRound){
+            y = true;
         }
         else if (e.getSource() == Bet){
             bet = calculatedBet;
@@ -289,7 +302,7 @@ public class Main extends JPanel implements ActionListener{
     public void playerMakesBet(Player player){
         reset();
         changeButtonVisibility(chipButtons, true);
-        display.setText("Enter how much you would like to bet \n You must enter a valid amount");
+        display.setText("Enter how much you would like to bet by pressing the buttons below and then by pressing BET \n You must enter a valid amount");
         calculatedBet = 0;
         do{
             bet = 0;
@@ -595,11 +608,11 @@ public class Main extends JPanel implements ActionListener{
     public void nextRoundKey(){
         changeButtonVisibility(moveButtons, false);
         y = false;
-        yes.setVisible(true); 
+        nextRound.setVisible(true); 
         while(!y){
             pause(200);
         }
-        yes.setVisible(false);
+        nextRound.setVisible(false);
         y = false;
     }
     
