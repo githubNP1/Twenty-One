@@ -8,7 +8,7 @@ In order to run the game you will need to add all the pictures in the Picture Fo
 
 - A natural pays 1.5 times the player's bet
 - Player can only split once
-- Player can split any pair
+- Player can split cards of the same type, not value
 
 - Player can only double on first move if first 2 cards add to 9, 10 or 11
 - Ace counts as 1 or 11
