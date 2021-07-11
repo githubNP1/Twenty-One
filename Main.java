@@ -1,4 +1,4 @@
-package Twenty_One;
+package TwentyOne;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -51,28 +51,57 @@ public class Main extends JPanel implements ActionListener{
     public void paintComponent(Graphics g){
         super.paintComponent(g); 
         g.drawImage(table, 1, 1, null);
+        //30 - 830
+        //face down card  381 429
         try{
             int i = 0;
             for(Card card : dealerCards){
                 if(card.faceUp){
-                    g.drawImage(cards, 400 + i*72, 70, 472 + i*72, 166, card.x1, card.y1, card.x2, card.y2, null);
+                    g.drawImage(cards, 430 + i*72 - (dealer.hand.hand.size() * 36), 70, 502 + i*72 - (dealer.hand.hand.size() * 36), 166, card.x1, card.y1, card.x2, card.y2, null);   //no need for x2 and y2
+                }
+                else{ //maybe condense numbers
+                    g.drawImage(cards, 430 + i*72 - (dealer.hand.hand.size() * 36), 70, 502 + i*72 - (dealer.hand.hand.size() * 36), 166, 376, 434, 448, 530, null);
                 }
                 i++;
             }
+            for(Hand hand : player.hands){
+                int w = player.hands.indexOf(hand) + 1;
+                int first = (800/(1 + player.hands.size()))*w + 30 - 36;
+                int z = 0;
+                for(Card card : hand.hand){
+                    if(card.faceUp){
+                        g.drawImage(cards, first, 400 + 30*z, first + 72, 496 + 30*z, card.x1, card.y1, card.x2, card.y2, null); 
+                    }
+                    else{
+                        g.drawImage(cards, first, 400 + 30*z, first + 72, 496 + 30*z, 376, 434, 448, 530, null); 
+                    }
+                    z++;
+                }
+            }/*
             int j = 0;
             for(Card card : playerFirstCards){
                 if(card.faceUp){
-                    g.drawImage(cards, 80 + j*72, 400, 152 + j*72, 496, card.x1, card.y1, card.x2, card.y2, null);
+                    //g.drawImage(cards, 80 + j*72, 400, 152 + j*72, 496, card.x1, card.y1, card.x2, card.y2, null); 
+                    g.drawImage(cards, 80, 400 + 30*j, 152, 496 + 30*j, card.x1, card.y1, card.x2, card.y2, null); 
+                }
+                else{
+                    //g.drawImage(cards, 80 + j*72, 400, 152 + j*72, 496, 376, 434, 448, 530, null); 
+                    g.drawImage(cards, 80, 400 + 30*j, 152, 496 + 30*j, 376, 434, 448, 530, null); 
                 }
                 j++;
             }
             int k = 0;
             for(Card card : playerSecondCards){
                 if(card.faceUp){
-                    g.drawImage(cards, 400 + k*72, 400, 472 + k*72, 496, card.x1, card.y1, card.x2, card.y2, null);
+                    //g.drawImage(cards, 400 + k*72, 400, 472 + k*72, 496, card.x1, card.y1, card.x2, card.y2, null);
+                    g.drawImage(cards, 400, 400 + 30*k, 472, 496 + 30*k, card.x1, card.y1, card.x2, card.y2, null);
+                }
+                else{
+                    //g.drawImage(cards, 400 + k*72, 400, 472 + k*72, 496, 376, 434, 448, 530, null);
+                    g.drawImage(cards, 400, 400 + 30*k, 472, 496 + 30*k, 376, 434, 448, 530, null);
                 }
                 k++;
-            }
+            }*/
         }catch(Exception e){}
     }
     
@@ -113,7 +142,7 @@ public class Main extends JPanel implements ActionListener{
         labelChips = createLabels(labelChips, "CHIPS: ", player.chips, 880, 540, 100, 20);
         labelInsuranceBet = createLabels(labelInsuranceBet, "INSURANCE: ", player.insuranceBet, 880, 500, 200, 20);
         labelSecondBet = createLabels(labelSecondBet, "SECOND BET: ", bet, 880, 480, 200, 20);
-        dealerScore = createScoreLabels(dealerScore, "DEALER SCORE: ", 400, 180, 250, 20);
+        dealerScore = createScoreLabels(dealerScore, "DEALER SCORE: ", 375, 180, 250, 20);
         firstScore = createScoreLabels(firstScore, "FIRST HAND SCORE: ", 80, 370, 300, 20);
         secondScore = createScoreLabels(secondScore, "SECOND HAND SCORE: ", 400, 370, 300, 20);
         
@@ -296,7 +325,7 @@ public class Main extends JPanel implements ActionListener{
     }
     
     public void pause(int time){
-        try{Thread.sleep(time);} catch (InterruptedException ex) {}
+        try{Thread.sleep(time/1000);} catch (InterruptedException ex) {}
     }
     
     public void playerMakesBet(Player player){
@@ -323,6 +352,7 @@ public class Main extends JPanel implements ActionListener{
         playerFirstCards.clear();
         playerSecondCards.clear();
         dealerCards.clear();
+        player.splits = 0;
         repaint();
         dealer.hand.bust = false;
         player.natural = false;
@@ -432,10 +462,10 @@ public class Main extends JPanel implements ActionListener{
             play(player, dealer);
         }
         labelChips.setText("CHIPS: " + player.chips);
+        nextRoundKey();
         labelBet.setText("BET: ");
         labelSecondBet.setText("SECOND BET: ");
         labelInsuranceBet.setText("INSURANCE: "); 
-        nextRoundKey();
     }
     
     public void play(Player player, Dealer dealer){
@@ -444,7 +474,7 @@ public class Main extends JPanel implements ActionListener{
         while(!hand.checkForBust() && !hand.twentyOne()){
             firstScore.setText("FIRST HAND SCORE: " + hand.getVisibleScore());
             hitBo = false; standBo = false; doubleBo = false; splitBo = false;
-            moveButtonVisibility(hand.moveChoices());
+            moveButtonVisibility(hand.moveChoices(player));
             while(!hitBo && !standBo && !doubleBo && !splitBo){
                 pause(200);
             }
@@ -479,7 +509,7 @@ public class Main extends JPanel implements ActionListener{
             while(!hand.checkForBust() && !hand.twentyOne()){
                 secondScore.setText("SECOND HAND SCORE: " + hand.getVisibleScore()); 
                 hitBo = false; standBo = false; doubleBo = false; splitBo = false;
-                moveButtonVisibility(hand.moveChoices());
+                moveButtonVisibility(hand.moveChoices(player));
                 while(!hitBo && !standBo && !doubleBo && !splitBo){
                     pause(200);
                 }
@@ -576,16 +606,28 @@ public class Main extends JPanel implements ActionListener{
         dealerScore.setText("DEALER SCORE: " + dealer.hand.getVisibleScore());
         pause(2000);
         if(dealer.hand.checkForBust()){
-            display.setText("Dealer is bust, you win");
-            player.chips += 2 * playerHand.bet;
+            if(playerHand.checkAltWin()){
+                display.setText("Dealer is bust, you win\n" + playerHand.returnAltWin().get(1));
+                player.chips += (1 + (double) playerHand.returnAltWin().get(0)) * playerHand.bet;  
+            }
+            else{
+                display.setText("Dealer is bust, you win");
+                player.chips += 2 * playerHand.bet;
+            }
         }
         //settlement
         else if(dealer.hand.getTotalScore() > playerHand.getTotalScore()){
             display.setText("Dealer wins");
         }
         else if(dealer.hand.getTotalScore() < playerHand.getTotalScore()){
-            display.setText("You win");
-            player.chips += 2 * playerHand.bet;
+            if(playerHand.checkAltWin()){
+                display.setText("Dealer is bust, you win\n" + playerHand.returnAltWin().get(1));
+                player.chips += (1 + (double) playerHand.returnAltWin().get(0)) * playerHand.bet; 
+            }
+            else{
+                display.setText("Dealer is bust, you win");
+                player.chips += 2 * playerHand.bet;
+            }
         }
         else if(dealer.hand.getTotalScore() == playerHand.getTotalScore()){
             display.setText("Standoff");
@@ -622,3 +664,15 @@ public class Main extends JPanel implements ActionListener{
         }
     }            
 }
+
+/*
+more rules to add
+up to 3 splits- so up to 4 hands
+5 card 21 pays 3:2
+6 card 21 pays 2:1
+7+ card 21 pays 3:1
+6,7,8 or 7,7,7 pays 3:2
+"" same suit pays 2:1
+
+make it clear how many chips you won after every round
+*/
